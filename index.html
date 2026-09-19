@@ -79,21 +79,21 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       
       <!-- Client Company Brand -->
-      <div class="flex items-center gap-4">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center font-bold text-black shadow-lg shadow-emerald-500/20 text-sm tracking-wider">
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center font-bold text-black shadow-lg shadow-emerald-500/20 text-xs sm:text-sm tracking-wider shrink-0">
           ▲
         </div>
-        <div>
+        <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <span class="font-bold text-white tracking-tight text-base font-mono">APEX<span class="text-emerald-400 font-extrabold">PRICING</span></span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide">ENTERPRISE SYSTEM</span>
+            <span class="font-bold text-white tracking-tight text-sm sm:text-base font-mono">APEX<span class="text-emerald-400 font-extrabold">PRICING</span></span>
+            <span class="hidden sm:inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide">ENTERPRISE SYSTEM</span>
           </div>
-          <div class="text-[11px] text-zinc-400">Apex Retail Labs Inc. • Org ID: <span class="font-mono text-emerald-400/90">#APX-7741</span></div>
+          <div class="text-[11px] text-zinc-400 truncate max-w-[130px] sm:max-w-none"><span class="hidden sm:inline">Apex Retail Labs Inc. • </span>Org ID: <span class="font-mono text-emerald-400/90">#APX-7741</span></div>
         </div>
       </div>
 
       <!-- System Controls & Client Account Profile -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         
         <!-- Live Daemon Status -->
         <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkgreen-900 border border-emerald-500/20 text-zinc-300 text-xs font-mono">
@@ -102,19 +102,20 @@
         </div>
 
         <!-- Manual Force Scrape -->
-        <button id="runScrapeBtn" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-darkgreen-850 hover:bg-darkgreen-800 border border-emerald-500/30 text-emerald-300 hover:text-white text-xs font-mono transition-all">
-          <svg id="scrapeSpinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span id="scrapeText">Force Sync</span>
+        <button id="runScrapeBtn" class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-darkgreen-850 hover:bg-darkgreen-800 border border-emerald-500/30 text-emerald-300 hover:text-white text-xs font-mono transition-all" title="Force Sync">
+          <svg id="scrapeSpinner" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span id="scrapeText" class="hidden sm:inline">Force Sync</span>
         </button>
 
         <!-- CSV Export -->
-        <button id="exportCsvBtn" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs tracking-wide transition-all shadow-md shadow-emerald-500/20">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span>Export Master CSV</span>
+        <button id="exportCsvBtn" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs tracking-wide transition-all shadow-md shadow-emerald-500/20" title="Export Master CSV">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span class="hidden sm:inline">Export Master CSV</span>
+          <span class="sm:hidden">CSV</span>
         </button>
 
         <!-- User Profile Avatar Icon -->
-        <div class="pl-2 border-l border-darkgreen-800 flex items-center">
+        <div class="pl-1.5 sm:pl-2 border-l border-darkgreen-800 flex items-center">
           <button class="w-8 h-8 rounded-full bg-darkgreen-800 border border-emerald-500/30 hover:border-emerald-400 flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-colors" title="User Profile">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -242,7 +243,7 @@
     </section>
 
     <!-- LIVE SCRAPED PRODUCTS REPRICING TABLE -->
-    <section class="green-card rounded-2xl p-6">
+    <section class="green-card rounded-2xl p-4 sm:p-6">
       
       <!-- Table Header & Controls -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -252,13 +253,13 @@
         </div>
 
         <!-- Search & Filter Options -->
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="relative">
-            <input type="text" id="tableSearch" placeholder="Search SKU or Product..." class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 pl-8 text-xs text-white placeholder-zinc-500 font-mono focus:outline-none focus:border-emerald-400 w-60">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+          <div class="relative w-full sm:w-60">
+            <input type="text" id="tableSearch" placeholder="Search SKU or Product..." class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 pl-8 text-xs text-white placeholder-zinc-500 font-mono focus:outline-none focus:border-emerald-400 w-full">
             <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
 
-          <select id="platformFilter" class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-400">
+          <select id="platformFilter" class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-400 w-full sm:w-auto">
             <option value="ALL">All Competitors</option>
             <option value="Amazon">Amazon US</option>
             <option value="BestBuy">BestBuy</option>
@@ -269,8 +270,8 @@
       </div>
 
       <!-- Table Body -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs font-mono" id="productsTable">
+      <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <table class="w-full text-left text-xs font-mono min-w-[650px]" id="productsTable">
           <thead>
             <tr class="border-b border-darkgreen-800 text-zinc-400 text-[11px] uppercase tracking-wider">
               <th class="pb-3 font-medium">SKU / Item Description</th>
