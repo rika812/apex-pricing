@@ -15,7 +15,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 # Logging setup
@@ -86,7 +86,7 @@ class ApexScraperEngine:
             competitor_price=competitor_price,
             apex_price=base_price,
             stock_status=status,
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat()
         )
         logger.info(f"[PARSER] Extracted {sku}: Comp=${competitor_price} | Rec: {product.recommendation}")
         return product
