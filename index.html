@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Price Intelligence | Enterprise Repricing & Competitor Crawler</title>
+  <meta name="description" content="Proprietary internal competitor pricing tracker, margin intelligence, and automated scraper portal for Apex Retail Labs Inc.">
+  <meta property="og:title" content="Apex Price Intelligence | Enterprise Portal">
+  <meta property="og:description" content="Automated competitor price scraping, repricing recommendations, and catalog health intelligence.">
+  <meta property="og:type" content="website">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            matrix: {
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+            },
+            darkgreen: {
+              950: '#040705',
+              900: '#070d08',
+              850: '#0c160f',
+              800: '#122016',
+              750: '#192b1f',
+              700: '#223829',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #040705;
+      color: #d1fae5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .green-card {
+      background: linear-gradient(180deg, rgba(12, 22, 15, 0.9) 0%, rgba(7, 13, 8, 0.96) 100%);
+      border: 1px solid rgba(34, 197, 94, 0.15);
+      backdrop-filter: blur(14px);
+    }
+    .green-card:hover {
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+    .green-glow {
+      box-shadow: 0 0 35px -10px rgba(34, 197, 94, 0.2);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070d08;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #192b1f;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- TOP APP HEADER (100% CLIENT INTERNAL ENTERPRISE BRANDING) -->
+  <header class="sticky top-0 z-40 border-b border-emerald-500/15 bg-darkgreen-950/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Client Company Brand -->
+      <div class="flex items-center gap-4">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center font-bold text-black shadow-lg shadow-emerald-500/20 text-sm tracking-wider">
+          ▲
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-white tracking-tight text-base font-mono">APEX<span class="text-emerald-400 font-extrabold">PRICING</span></span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide">ENTERPRISE SYSTEM</span>
+          </div>
+          <div class="text-[11px] text-zinc-400">Apex Retail Labs Inc. • Org ID: <span class="font-mono text-emerald-400/90">#APX-7741</span></div>
+        </div>
+      </div>
+
+      <!-- System Controls & Client Account Profile -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Live Daemon Status -->
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkgreen-900 border border-emerald-500/20 text-zinc-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Cron Engine: <span class="text-emerald-300 font-semibold">Active (Every 15m)</span></span>
+        </div>
+
+        <!-- Manual Force Scrape -->
+        <button id="runScrapeBtn" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-darkgreen-850 hover:bg-darkgreen-800 border border-emerald-500/30 text-emerald-300 hover:text-white text-xs font-mono transition-all">
+          <svg id="scrapeSpinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span id="scrapeText">Force Sync</span>
+        </button>
+
+        <!-- CSV Export -->
+        <button id="exportCsvBtn" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs tracking-wide transition-all shadow-md shadow-emerald-500/20">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>Export Master CSV</span>
+        </button>
+
+        <!-- Client Employee Profile -->
+        <div class="hidden sm:flex items-center gap-2.5 pl-3 border-l border-darkgreen-800">
+          <div class="w-8 h-8 rounded-full bg-darkgreen-800 border border-emerald-400/40 flex items-center justify-center text-xs font-bold text-emerald-300 font-mono">
+            DM
+          </div>
+          <div class="text-left leading-tight hidden xl:block">
+            <div class="text-xs font-bold text-white">David Miller</div>
+            <div class="text-[10px] text-zinc-400">Head of Catalog Ops</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- DASHBOARD MAIN BODY -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+    <!-- KPI CARDS (BLACK & GREEN FINTECH STYLE) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Card 1 -->
+      <div class="green-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2">
+          <span>Monitored Inventory</span>
+          <span class="text-emerald-300 bg-emerald-950/70 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px]">100% Synced</span>
+        </div>
+        <div class="text-3xl font-mono font-bold text-white tracking-tight">1,248 <span class="text-xs font-normal text-zinc-400 font-sans">SKUs</span></div>
+        <div class="text-[11px] text-zinc-400 mt-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Amazon US, BestBuy, Walmart, B&H</span>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="green-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2">
+          <span>Competitor Price Drops</span>
+          <span class="text-amber-400 bg-amber-950/50 border border-amber-500/20 px-2 py-0.5 rounded text-[10px]">Undercut Alerts</span>
+        </div>
+        <div class="text-3xl font-mono font-bold text-amber-400 tracking-tight">38 <span class="text-xs font-normal text-zinc-400 font-sans">items</span></div>
+        <div class="text-[11px] text-zinc-400 mt-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>Action required: Below MAP threshold</span>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="green-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2">
+          <span>Projected Monthly Uplift</span>
+          <span class="text-emerald-400 bg-emerald-950/50 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px]">Revenue Delta</span>
+        </div>
+        <div class="text-3xl font-mono font-bold text-emerald-400 tracking-tight">+$18,420</div>
+        <div class="text-[11px] text-zinc-400 mt-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>From automated BuyBox matching rules</span>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="green-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2">
+          <span>Scraper Node Health</span>
+          <span class="text-emerald-300 bg-emerald-950/70 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px]">Optimal</span>
+        </div>
+        <div class="text-3xl font-mono font-bold text-white tracking-tight">99.8% <span class="text-xs font-normal text-emerald-400 font-sans font-semibold">Uptime</span></div>
+        <div class="text-[11px] text-zinc-400 mt-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Residential Proxy Pool: 250 Active IPs</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ANALYTICS & LOG STREAM SECTION -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Chart Area (2 Cols) -->
+      <div class="green-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-400 font-mono text-xs uppercase tracking-wider font-semibold">Catalog Price Dynamics</span>
+              <span class="text-[10px] bg-darkgreen-850 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded font-mono">Real-Time Aggregation</span>
+            </div>
+            <h2 class="text-base font-bold text-white tracking-tight mt-1">Average Market Price vs Apex Listed Price ($)</h2>
+          </div>
+          
+          <div class="flex items-center gap-1 bg-darkgreen-900 border border-emerald-500/20 p-1 rounded-xl text-xs font-mono">
+            <button class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-medium border border-emerald-400/30">7 Days</button>
+            <button class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white">30 Days</button>
+            <button class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white">Quarter</button>
+          </div>
+        </div>
+
+        <div class="w-full h-64">
+          <canvas id="priceTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Scraper Pipeline Console (1 Col) -->
+      <div class="green-card rounded-2xl p-6 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-darkgreen-800 pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-mono font-bold text-white uppercase tracking-wider">Crawler Node Console</span>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-500/20 px-2 py-0.5 rounded">Server: node-us-01</span>
+        </div>
+
+        <div id="terminalStream" class="bg-black/95 rounded-xl p-3 font-mono text-[11px] leading-relaxed text-zinc-400 h-64 overflow-y-auto space-y-1.5 border border-emerald-500/15">
+          <div><span class="text-zinc-600">20:16:01</span> <span class="text-emerald-400">[CRON]</span> Initiated scheduled scan job for Org #APX-7741</div>
+          <div><span class="text-zinc-600">20:16:04</span> <span class="text-zinc-400">[PROXY]</span> Rotated residential IP node (US-East)</div>
+          <div><span class="text-zinc-600">20:16:08</span> <span class="text-emerald-300">[PARSER]</span> Amazon BuyBox extraction: 100% (24 items)</div>
+          <div><span class="text-zinc-600">20:16:11</span> <span class="text-amber-400">[ALERT]</span> Competitor price drop on SKU: SNY-XM5-BLK ($328.00 vs $349.00)</div>
+          <div><span class="text-zinc-600">20:16:14</span> <span class="text-emerald-400">[DISPATCH]</span> Alert sent to channel: <span class="text-white font-semibold">@ApexDeals_Bot</span></div>
+          <div><span class="text-zinc-600">20:16:18</span> <span class="text-emerald-300">[SYNC]</span> Synced to PostgreSQL internal database (18ms)</div>
+          <div class="text-emerald-400/80">● Daemon idle, next execution scheduled in 10:24...</div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-darkgreen-800 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+          <span>Worker: <strong class="text-white font-mono">crawler-daemon-01</strong></span>
+          <span class="text-emerald-400 font-mono">Status: Connected</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- LIVE SCRAPED PRODUCTS REPRICING TABLE -->
+    <section class="green-card rounded-2xl p-6">
+      
+      <!-- Table Header & Controls -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-base font-bold text-white tracking-tight">Competitor Tracking & Repricing Matrix</h2>
+          <p class="text-xs text-zinc-400">Real-time market price data filtered for Apex Retail Labs catalog</p>
+        </div>
+
+        <!-- Search & Filter Options -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative">
+            <input type="text" id="tableSearch" placeholder="Search SKU or Product..." class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 pl-8 text-xs text-white placeholder-zinc-500 font-mono focus:outline-none focus:border-emerald-400 w-60">
+            <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+
+          <select id="platformFilter" class="bg-darkgreen-900 border border-emerald-500/20 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-400">
+            <option value="ALL">All Competitors</option>
+            <option value="Amazon">Amazon US</option>
+            <option value="BestBuy">BestBuy</option>
+            <option value="Walmart">Walmart</option>
+            <option value="B&H">B&H Photo</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono" id="productsTable">
+          <thead>
+            <tr class="border-b border-darkgreen-800 text-zinc-400 text-[11px] uppercase tracking-wider">
+              <th class="pb-3 font-medium">SKU / Item Description</th>
+              <th class="pb-3 font-medium">Lowest Competitor</th>
+              <th class="pb-3 font-medium">Competitor Price</th>
+              <th class="pb-3 font-medium">Apex Listed Price</th>
+              <th class="pb-3 font-medium">Algorithmic Recommendation</th>
+              <th class="pb-3 font-medium">Inventory Stock</th>
+              <th class="pb-3 font-medium text-right">Last Sync</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-darkgreen-800/60" id="tableBody">
+            
+            <!-- Item 1 -->
+            <tr class="hover:bg-darkgreen-850/40 transition-colors">
+              <td class="py-3.5 font-sans font-medium text-white">
+                Sony WH-1000XM5 Wireless Noise Canceling Headphones
+                <div class="text-[10px] font-mono text-emerald-400">SKU: SNY-XM5-BLK</div>
+              </td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-darkgreen-800 border border-emerald-500/20 text-emerald-300 text-[10px]">Amazon</span>
+              </td>
+              <td class="py-3.5 text-amber-400 font-bold text-sm">$328.00</td>
+              <td class="py-3.5 text-zinc-300 font-mono">$349.00</td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/30 text-amber-300 font-semibold text-[10px]">Match to $327.99</span>
+              </td>
+              <td class="py-3.5 text-zinc-300">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>In Stock (18)</span>
+              </td>
+              <td class="py-3.5 text-right text-zinc-400">3m ago</td>
+            </tr>
+
+            <!-- Item 2 -->
+            <tr class="hover:bg-darkgreen-850/40 transition-colors">
+              <td class="py-3.5 font-sans font-medium text-white">
+                Apple MacBook Air 13-Inch M3 Chip (16GB RAM, 512GB SSD)
+                <div class="text-[10px] font-mono text-emerald-400">SKU: APL-M3-13SL</div>
+              </td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-darkgreen-800 border border-emerald-500/20 text-emerald-300 text-[10px]">BestBuy</span>
+              </td>
+              <td class="py-3.5 text-white font-bold text-sm">$1,299.00</td>
+              <td class="py-3.5 text-zinc-300 font-mono">$1,299.00</td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-semibold text-[10px]">Optimal BuyBox (Active)</span>
+              </td>
+              <td class="py-3.5 text-zinc-300">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>In Stock (42)</span>
+              </td>
+              <td class="py-3.5 text-right text-zinc-400">7m ago</td>
+            </tr>
+
+            <!-- Item 3 -->
+            <tr class="hover:bg-darkgreen-850/40 transition-colors">
+              <td class="py-3.5 font-sans font-medium text-white">
+                LG C3 Series 65-Inch OLED 4K Smart Gaming Television
+                <div class="text-[10px] font-mono text-emerald-400">SKU: LG-OLED-65C3</div>
+              </td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-darkgreen-800 border border-emerald-500/20 text-emerald-300 text-[10px]">Walmart</span>
+              </td>
+              <td class="py-3.5 text-amber-400 font-bold text-sm">$1,496.99</td>
+              <td class="py-3.5 text-zinc-300 font-mono">$1,599.00</td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/30 text-amber-300 font-semibold text-[10px]">Reprice -$102.00</span>
+              </td>
+              <td class="py-3.5 text-zinc-300">
+                <span class="inline-flex items-center gap-1.5 text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Low Stock (2)</span>
+              </td>
+              <td class="py-3.5 text-right text-zinc-400">11m ago</td>
+            </tr>
+
+            <!-- Item 4 -->
+            <tr class="hover:bg-darkgreen-850/40 transition-colors">
+              <td class="py-3.5 font-sans font-medium text-white">
+                Logitech MX Master 3S Ergonomic Performance Mouse
+                <div class="text-[10px] font-mono text-emerald-400">SKU: LOGI-MX3S-GR</div>
+              </td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-darkgreen-800 border border-emerald-500/20 text-emerald-300 text-[10px]">B&H</span>
+              </td>
+              <td class="py-3.5 text-white font-bold text-sm">$89.99</td>
+              <td class="py-3.5 text-zinc-300 font-mono">$99.99</td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-semibold text-[10px]">Raise Price (Comp OOS)</span>
+              </td>
+              <td class="py-3.5 text-zinc-300">
+                <span class="inline-flex items-center gap-1.5 text-rose-400"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Comp Sold Out</span>
+              </td>
+              <td class="py-3.5 text-right text-zinc-400">14m ago</td>
+            </tr>
+
+            <!-- Item 5 -->
+            <tr class="hover:bg-darkgreen-850/40 transition-colors">
+              <td class="py-3.5 font-sans font-medium text-white">
+                Dell UltraSharp 27" 4K USB-C Hub Monitor (U2723QE)
+                <div class="text-[10px] font-mono text-emerald-400">SKU: DELL-U2723QE</div>
+              </td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-darkgreen-800 border border-emerald-500/20 text-emerald-300 text-[10px]">Amazon</span>
+              </td>
+              <td class="py-3.5 text-amber-400 font-bold text-sm">$499.00</td>
+              <td class="py-3.5 text-zinc-300 font-mono">$549.00</td>
+              <td class="py-3.5">
+                <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/30 text-amber-300 font-semibold text-[10px]">Match BuyBox ($498.99)</span>
+              </td>
+              <td class="py-3.5 text-zinc-300">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>In Stock (14)</span>
+              </td>
+              <td class="py-3.5 text-right text-zinc-400">18m ago</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- CLIENT SYSTEM STATUS FOOTNOTE -->
+    <section class="green-card rounded-2xl p-5 border-l-4 border-l-emerald-500 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-zinc-300">All Scraper Daemons Operational: Telegram alert webhook connected to <strong class="text-white">@ApexDeals_Bot</strong></span>
+      </div>
+      <div class="text-zinc-400">
+        Database: PostgreSQL Cluster (12.4ms query avg)
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STRICT INTERNAL ENTERPRISE FOOTER -->
+  <footer class="border-t border-emerald-500/15 bg-darkgreen-950 py-6 text-center text-xs text-zinc-500 font-mono">
+    © 2026 Apex Retail Labs Inc. • Proprietary Internal Repricing & Market Intelligence Platform • All Rights Reserved
+  </footer>
+
+  <!-- CHART & SIMULATED ACTIONS -->
+  <script>
+    // Initialize Chart with Black & Matrix Green Theme
+    const ctx = document.getElementById('priceTrendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+          {
+            label: 'Market Lowest Price ($)',
+            data: [610, 605, 595, 580, 572, 565, 560],
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+            borderWidth: 2.5,
+            tension: 0.35,
+            fill: true,
+            pointBackgroundColor: '#22c55e',
+            pointRadius: 4
+          },
+          {
+            label: 'Apex Buy Box Price ($)',
+            data: [630, 625, 615, 600, 585, 570, 565],
+            borderColor: '#86efac',
+            borderWidth: 1.5,
+            borderDash: [5, 5],
+            tension: 0.35,
+            pointBackgroundColor: '#86efac',
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 12,
+              color: '#86efac',
+              font: { family: '"JetBrains Mono"', size: 11 }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#070d08',
+            titleColor: '#22c55e',
+            bodyColor: '#d1fae5',
+            borderColor: 'rgba(34, 197, 94, 0.3)',
+            borderWidth: 1,
+            titleFont: { family: '"JetBrains Mono"' },
+            bodyFont: { family: '"JetBrains Mono"' }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(34, 197, 94, 0.06)' },
+            ticks: { color: '#4ade80', font: { family: '"JetBrains Mono"', size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(34, 197, 94, 0.06)' },
+            ticks: { color: '#4ade80', font: { family: '"JetBrains Mono"', size: 10 } }
+          }
+        }
+      }
+    });
+
+    // Force Sync Action
+    const runBtn = document.getElementById('runScrapeBtn');
+    const scrapeSpinner = document.getElementById('scrapeSpinner');
+    const scrapeText = document.getElementById('scrapeText');
+    const terminal = document.getElementById('terminalStream');
+
+    runBtn.addEventListener('click', () => {
+      scrapeSpinner.classList.add('animate-spin');
+      scrapeText.innerText = 'Syncing...';
+      runBtn.disabled = true;
+
+      const time = new Date().toTimeString().split(' ')[0];
+      const log1 = document.createElement('div');
+      log1.innerHTML = `<span class="text-zinc-600">${time}</span> <span class="text-emerald-400">[TRIGGER]</span> Manual re-sync initiated by David M. (Catalog Ops)`;
+      terminal.appendChild(log1);
+
+      setTimeout(() => {
+        const log2 = document.createElement('div');
+        log2.innerHTML = `<span class="text-zinc-600">${time}</span> <span class="text-emerald-300">[SUCCESS]</span> 4 target marketplaces queried, 0 captchas encountered`;
+        terminal.appendChild(log2);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        scrapeSpinner.classList.remove('animate-spin');
+        scrapeText.innerText = 'Force Sync';
+        runBtn.disabled = false;
+      }, 1200);
+    });
+
+    // Client CSV Master Export
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "SKU,Product,LowestCompetitor,CompetitorPrice,ApexPrice,Recommendation,StockStatus,LastSync\n"
+        + "SNY-XM5-BLK,Sony WH-1000XM5,Amazon,$328.00,$349.00,Match to $327.99,In Stock,3m ago\n"
+        + "APL-M3-13SL,MacBook Air M3,BestBuy,$1299.00,$1299.00,Optimal BuyBox,In Stock,7m ago\n"
+        + "LG-OLED-65C3,LG C3 65 OLED,Walmart,$1496.99,$1599.00,Reprice -$102.00,Low Stock,11m ago\n"
+        + "LOGI-MX3S-GR,Logitech MX Master 3S,B&H,$89.99,$99.99,Raise Price (Comp OOS),Comp Sold Out,14m ago\n"
+        + "DELL-U2723QE,Dell UltraSharp 27,Amazon,$499.00,$549.00,Match BuyBox,In Stock,18m ago\n";
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "apex_retail_master_feed.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Real-time Search & Filter
+    const searchInput = document.getElementById('tableSearch');
+    const filterSelect = document.getElementById('platformFilter');
+    const rows = document.querySelectorAll('#tableBody tr');
+
+    function filterTable() {
+      const query = searchInput.value.toLowerCase();
+      const platform = filterSelect.value;
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchesQuery = text.includes(query);
+        const matchesPlatform = platform === 'ALL' || text.includes(platform.toLowerCase());
+
+        if (matchesQuery && matchesPlatform) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    filterSelect.addEventListener('change', filterTable);
+  </script>
+
+</body>
+</html>
